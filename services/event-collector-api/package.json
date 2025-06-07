@@ -1,0 +1,14 @@
+{
+    "name": "event-collector",
+    "version": "1.0.0",
+    "description": "Sammelt Events und sendet sie an Kafka mit Bun",
+    "main": "server.js",
+    "type": "module",
+    "scripts": {
+      "start": "bun run server.js"
+    },
+    "dependencies": {
+      "express": "^4.19.2",
+      "kafkajs": "^2.2.4"
+    }
+  }

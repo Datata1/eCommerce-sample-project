@@ -1,0 +1,12 @@
+FROM apache/flink:1.18.1-scala_2.12-java11
+
+WORKDIR /opt/flink/usrapp
+
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+RUN mkdir -p lib
+RUN wget https://repo.maven.apache.org/maven2/org/apache/flink/flink-sql-connector-kafka/3.0.2-1.18.1/flink-sql-connector-kafka-3.0.2-1.18.1.jar -O lib/flink-sql-connector-kafka-3.0.2-1.18.1.jar
+COPY uv.lock .
+COPY pyproject.toml .
+RUN uv sync
+COPY job.py .
