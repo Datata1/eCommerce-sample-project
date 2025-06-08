@@ -285,10 +285,15 @@ pyrightconfig.json
 # Kafka 
 kafka_2.13-4.0.0.tgz
 services/kafka_2.13-4.0.0/*
+services/*.jar
+services/flink*
 
 # certs
 certs/c*
 certs/kafka*
+
+# jar files
+*.jar
 
 
 

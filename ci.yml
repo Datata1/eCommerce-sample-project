@@ -16,6 +16,21 @@ prepare:
       command: cd services/profile-builder-processor && uv sync
     - name: setup self signed certificates
       command: chmod +x ./scripts/setup-kafka.sh && ./scripts/setup-kafka.sh
+    - name: download flink jar
+      command: "[ -f ./services/flink-distribution.tgz ] || ( wget
+        https://archive.apache.org/dist/flink/flink-1.18.1/flink-1.18.1-bin-sca\
+        la_2.12.tgz -O services/flink-distribution.tgz && tar -xzf
+        services/flink-distribution.tgz -C services/ )"
+    - name: download kafka-connector
+      command: "[ -f flink-connector-kafka-3.1.0-1.18.jar ] || ( wget
+        https://repo.maven.apache.org/maven2/org/apache/flink/flink-connector-k\
+        afka/3.1.0-1.18/flink-connector-kafka-3.1.0-1.18.jar && cp
+        flink-connector-kafka-3.1.0-1.18.jar services/flink-1.18.1/lib/ )"
+    - name: download kafka client
+      command: "[ -f kafka-clients-4.0.0.jar ] || ( wget
+        https://repo.maven.apache.org/maven2/org/apache/kafka/kafka-clients/4.0\
+        .0/kafka-clients-4.0.0.jar && cp kafka-clients-4.0.0.jar
+        services/flink-1.18.1/lib/ )"
 test:
   steps:
     - name: "TODO: add tests for every service"
@@ -50,10 +65,20 @@ run:
   profile-builder-processor:
     steps:
       - name: start python service
-        command: cd services/profile-builder-processor && uv run job.py
+        command: cd services/profile-builder-processor && export
+          FLINK_HOME=/home/user/app/services/flink-1.18.1 && export
+          _JAVA_OPTIONS="--add-opens=java.base/java.util=ALL-UNNAMED
+          --add-opens=java.base/java.lang=ALL-UNNAMED" && uv run job.py
     plan: 8
     replicas: 1
     isPublic: false
+    network:
+      ports:
+        - port: 3000
+          isPublic: false
+        - port: 8081
+          isPublic: false
+      paths: []
   kafka:
     steps:
       - name: "start Kafka "
@@ -67,7 +92,4 @@ run:
           isPublic: false
         - port: 9093
           isPublic: false
-      paths:
-        - port: 3000
-          path: /kafdrop
-          stripPath: true
+      paths: []
