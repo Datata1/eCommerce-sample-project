@@ -3,20 +3,19 @@ prepare:
   steps:
     - name: add env vars to codesphere workspace
       command: echo "insert here go cli client"
-    - name: install bun (storefront-ui)
-      command: nix-env -iA nixpkgs.bun
+    - name: install nix dependencies
+      command: chmod +x scripts/install-nix-packages.sh &&
+        ./scripts/install-nix-packages.sh
     - name: install node packages (storefront-ui)
       command: cd services/storefront-ui && bun install
-    - name: install go (recommendation-api)
-      command: nix-env -iA nixpkgs.go
     - name: install go dependecies (recommendation-api)
       command: cd services/recommendation-api && go mod download
     - name: "install node dependencies (event-collector-api) "
       command: cd services/event-collector-api && bun install
-    - name: install uv  (profile-builder-processor)
-      command: nix-env -iA nixpkgs.uv
     - name: install python packages (profile-builder-processor)
       command: cd services/profile-builder-processor && uv sync
+    - name: setup self signed certificates
+      command: chmod +x ./scripts/setup-kafka.sh && ./scripts/setup-kafka.sh
 test:
   steps:
     - name: "TODO: add tests for every service"
@@ -44,14 +43,31 @@ run:
   event-collector-api:
     steps:
       - name: start event collector service
-        command: bun run start
+        command: cd services/event-collector-api && bun run start
     plan: 8
     replicas: 1
     isPublic: false
   profile-builder-processor:
     steps:
       - name: start python service
-        command: uv run job.py
+        command: cd services/profile-builder-processor && uv run job.py
     plan: 8
     replicas: 1
     isPublic: false
+  kafka:
+    steps:
+      - name: "start Kafka "
+        command: process-compose -t=False -f process-compose.kafka.yaml
+    plan: 8
+    replicas: 1
+    isPublic: false
+    network:
+      ports:
+        - port: 3000
+          isPublic: false
+        - port: 9093
+          isPublic: false
+      paths:
+        - port: 3000
+          path: /kafdrop
+          stripPath: true

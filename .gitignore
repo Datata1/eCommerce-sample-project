@@ -282,3 +282,13 @@ poetry.toml
 # LSP config files
 pyrightconfig.json
 
+# Kafka 
+kafka_2.13-4.0.0.tgz
+services/kafka_2.13-4.0.0/*
+
+# certs
+certs/c*
+certs/kafka*
+
+
+

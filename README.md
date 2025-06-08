@@ -66,3 +66,4 @@ Demonstration der Flexibilität: Um zu zeigen, dass die Plattform es kann, könn
 
 
 kafka: https://kafka.apache.org/quickstart
+(TODO: passwords should be non static in the future (when using as template maybe random generated passwords in the beginning?))

@@ -1,0 +1,7 @@
+version: "0.5"
+
+processes:
+  kafka:
+    command: cd services/kafka_2.13-4.0.0 && bin/kafka-server-start.sh config/server.properties
+  healthprobe:
+    command: python3 -m http.server 3000
