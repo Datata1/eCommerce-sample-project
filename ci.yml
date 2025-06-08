@@ -1,0 +1,57 @@
+schemaVersion: v0.2
+prepare:
+  steps:
+    - name: add env vars to codesphere workspace
+      command: echo "insert here go cli client"
+    - name: install bun (storefront-ui)
+      command: nix-env -iA nixpkgs.bun
+    - name: install node packages (storefront-ui)
+      command: cd services/storefront-ui && bun install
+    - name: install go (recommendation-api)
+      command: nix-env -iA nixpkgs.go
+    - name: install go dependecies (recommendation-api)
+      command: cd services/recommendation-api && go mod download
+    - name: "install node dependencies (event-collector-api) "
+      command: cd services/event-collector-api && bun install
+    - name: install uv  (profile-builder-processor)
+      command: nix-env -iA nixpkgs.uv
+    - name: install python packages (profile-builder-processor)
+      command: cd services/profile-builder-processor && uv sync
+test:
+  steps:
+    - name: "TODO: add tests for every service"
+      command: 'echo "TODO: add tests for every service"'
+run:
+  storefront-ui:
+    steps:
+      - name: start dev server for now
+        command: cd services/storefront-ui && bun run dev -- --host 0.0.0.0 --port 3000
+    plan: 8
+    replicas: 1
+    isPublic: true
+    network:
+      path: /
+      stripPath: false
+  recommendation-api:
+    steps:
+      - command: cd services/recommendation-api && GO_PORT=3000 go run .
+    plan: 8
+    replicas: 1
+    isPublic: true
+    network:
+      path: /api/recommendation
+      stripPath: true
+  event-collector-api:
+    steps:
+      - name: start event collector service
+        command: bun run start
+    plan: 8
+    replicas: 1
+    isPublic: false
+  profile-builder-processor:
+    steps:
+      - name: start python service
+        command: uv run job.py
+    plan: 8
+    replicas: 1
+    isPublic: false
